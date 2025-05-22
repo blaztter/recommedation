@@ -3,151 +3,149 @@
 
 ## Project Overview
 
-Penyakit jantung merupakan penyebab kematian tertinggi di dunia, dengan lebih dari 17 juta kasus setiap tahun menurut WHO (2023). Deteksi dini sangat penting untuk mencegah komplikasi lebih lanjut. Dengan pemanfaatan machine learning, kita dapat membangun sistem prediksi yang membantu tenaga medis mengenali pasien berisiko tinggi lebih awal.
-
-Dalam proyek ini, model machine learning dibangun untuk mengklasifikasikan kemungkinan seseorang terkena penyakit jantung berdasarkan parameter klinis seperti tekanan darah, kolesterol, usia, dan detak jantung.
+Dengan meningkatnya jumlah konten anime di platform digital seperti MyAnimeList, Netflix, dan Crunchyroll, pengguna seringkali kesulitan dalam memilih anime yang sesuai dengan minat mereka. Hal ini diperparah dengan semakin banyaknya judul baru setiap musim. Sistem rekomendasi menjadi solusi penting untuk membantu pengguna menjelajahi koleksi anime secara lebih efisien dan personal. Dalam proyek ini, saya mengembangkan sistem rekomendasi anime menggunakan Content-Based Filtering.
 
 **Referensi:**  
-- WHO. (2023). *Cardiovascular Diseases (CVDs)*. Retrieved from https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds)
+- Netflix Technology Blog. (2016). The Netflix Recommender System: Algorithms, Business Value, and Innovation. https://netflixtechblog.com/the-netflix-recommender-system-55838468f429
 
 ## Business Understanding
 ### Problem Statement
-1. Bagaimana membangun model prediktif akurat untuk mendeteksi risiko penyakit jantung menggunakan data klinis pasien?
-2. Bagaimana mengidentifikasi faktor risiko dominan yang berkontribusi pada penyakit jantung?
-3. Bagaimana memastikan model memiliki kemampuan generalisasi baik untuk sistem pendukung keputusan medis?
+1. Bagaimana menemukan anime yang sesuai dengan preferensi mereka karena terlalu banyak pilihan.?
+2. Bagaimana personalisasi rekomendasi berdasarkan riwayat tontonan dan rating pengguna?
 
 
 ### Goals
 
-1. Membangun model Mencapai akurasi ≥85% untuk prediksi risiko penyakit jantung.
-2. Mengidentifikasi faktor risiko utama
-3. Menghasilkan model yang dapat diimplementasikan
+1. Membangun sistem rekomendasi anime berbasis konten (Content-Based Filtering ) untuk pengguna baru atau tanpa riwayat rating.
+2. memberikan rekomendasi yang relevan.
 
 ### Solution Statements
 
-1. Menggunakan Random Forest yang menangani non-linearitas data
-2. Menganalisis feature importance dari model Random Forest
-3. Menyimpan model dengan joblib dan menyederhanakan preprocessing
+1. Menggunakan Content-Based Filtering untuk merekomendasikan anime berdasarkan kesamaan fitur seperti judul, genre, dan tipe. 
+2. Menggunakan pola rating pengguna-anime untuk memprediksi kemungkinan suka/tidak suka pengguna terhadap anime tertentu. 
 
 ## Data Understanding
 
-Dataset digunakan dari Hugging Face: [https://huggingface.co/datasets/muhrafli/heart-diseases](https://huggingface.co/datasets/muhrafli/heart-diseases)
+Dataset digunakan dari kaggle: https://www.kaggle.com/datasets/khioya/recomendador-de-anime
 
-Jumlah data: 918 sampel, 12 kolom.
+terdapat 3 folder yaitu
+1. usuarios berisi 100 baris 3 kolom
+2. rating berisi 1504 baris 3 kolom
+3. anime berisi 12294 baris 
 
 ## Kondisi Data
-1. Missing Values: Tidak ditemukan (total 918 sampel, semua kolom lengkap)
+1. Missing Values: Tidak ditemukan 
 2. Duplikasi: Tidak ada data duplikat (`df.duplicated().sum() = 0`)
-3. Outlier: Tidak ada outlier yang ditemukan
+3. nilai kosong: Tidak ada
 
 ### Fitur-fitur dalam dataset:
-1. Age`: Usia pasien
-2. Sex`: Jenis kelamin (M/F)
-3. `ChestPainType`: Jenis nyeri dada (ATA, NAP, ASY, TA)
-4. `RestingBP`: Tekanan darah istirahat
-5. `Cholesterol`: Kadar kolesterol
-6. `FastingBS`: Gula darah puasa
-7. `RestingECG`: Hasil EKG saat istirahat
-8. `MaxHR`: Detak jantung maksimal
-9. `ExerciseAngina`: Nyeri saat olahraga (Y/N)
-10. `Oldpeak`: Penurunan ST setelah latihan
-11. `ST_Slope`: Kemiringan segmen ST
-12. `HeartDisease`: Target (0 = sehat, 1 = sakit jantung)
+
+
+| Kolom         | Tipe Data | Deskripsi                              |
+|---------------|-----------|----------------------------------------|
+| `userId`      | `int64`   | ID unik pengguna                       |
+| `animeId`     | `int64`   | ID unik anime                          |
+| `titulo`      | `object`  | Judul anime                            |
+| `genero`      | `object`  | Genre (dipisahkan dengan koma)         |
+| `tipo`        | `object`  | Jenis anime (TV, Movie, OVA, dsb.)     |
+| `episodios`   | `int64`   | Jumlah episode                         |
+| `rating`      | `float64` | Rating rata-rata anime                 |
+| `usuarios`    | `int64`   | Jumlah pengguna yang memberikan rating |
+
 
 ### Visualisasi Data (EDA)
-1. Distribusi usia → mayoritas di rentang 40–60 tahun
+1. Distribusi Rating Pengguna
 
-   ![download](https://github.com/user-attachments/assets/5ec82895-96ef-43be-a004-dcc49652bff2)
-
-
-   Berdasarkan histogram distribusi usia berdasarkan diagnosis penyakit jantung, terlihat bahwa penderita (biru) dan tidak penderita (oranye) memiliki pola yang berbeda. Puncak distribusi untuk tidak penderita berada di kisaran usia 50-60 tahun dengan jumlah mencapai sekitar 60 orang, sedangkan penderita menunjukkan puncak yang lebih tinggi di usia 55-65 tahun, mencapai hampir 70 orang. Ini menunjukkan bahwa risiko penyakit jantung cenderung meningkat pada kelompok usia 50-an hingga 60-an, dengan jumlah penderita lebih dominan di rentang tersebut dibandingkan tidak penderita.
-
-2. Korelasi `Cholesterol` dan `HeartDisease` tidak kuat
-
-   ![download](https://github.com/user-attachments/assets/63a76b7d-f84a-425a-b5f6-8d6660a9d945)
+   
+![download](https://github.com/user-attachments/assets/d4f0aa58-eeea-4b9b-948d-a62de6f58de2)
 
 
-   Matriks korelasi menunjukkan bahwa Oldpeak (0.4) dan MaxHR (-0.4) memiliki korelasi paling kuat dengan penyakit jantung, menjadikannya prediktor utama, diikuti oleh usia (0.28) dan gula darah puasa (0.27) dengan korelasi positif sedang, serta kolesterol (-0.23) yang menunjukkan korelasi negatif lemah yang tidak biasa dan perlu investigasi lebih lanjut. Fitur seperti tekanan darah istirahat (0.11) memiliki pengaruh minimal, sehingga Oldpeak dan MaxHR dapat diprioritaskan untuk analisis atau model prediksi penyakit jantung.
+   terlihat bahwa rating 4 dan 5 mendominasi dengan jumlah pengguna mendekati 500, menunjukkan kecenderungan positif dalam penilaian anime. Rating rendah seperti 1 (di bawah 100) dan 2 (sekitar 150-200) jauh lebih sedikit, sementara rating 3 berada di tengah (sekitar 300-400), mengindikasikan bahwa pengguna cenderung memberikan skor tinggi, mungkin karena hanya menilai anime yang mereka sukai, yang bisa mencerminkan bias positif dalam data.
 
+2. Top 10 Genre Anime
+
+   ![download](https://github.com/user-attachments/assets/3d2a5422-89ae-4be0-a40b-e062cc5f0579)
+
+
+
+   terlihat bahwa genre Comedy mendominasi dengan jumlah tertinggi mendekati 4,000, diikuti oleh Action dan Adventure dengan angka di atas 2,000, menunjukkan popularitas besar kedua genre tersebut. Fantasy, Sci-Fi, dan Drama memiliki jumlah yang lebih seimbang di kisaran 2,000, sementara Shounen, Kids, Romance, dan Slice of Life berada di bawah 2,000, dengan Slice of Life sebagai yang terendah. Ini mengindikasikan kecenderungan pengguna terhadap genre komedi dan aksi, mungkin karena kontennya lebih menghibur atau menarik secara luas.
+
+3. Distribusi tipe anime
+
+![download](https://github.com/user-attachments/assets/fe390cfd-58e8-4c00-9a87-909c62a0b1cd)
+
+
+   tipe TV mendominasi dengan jumlah mendekati 3,500, diikuti oleh OVA (sekitar 3,000) dan Movie (sekitar 2,500), menunjukkan popularitas besar format seri dan konten tambahan. Tipe Special berada di kisaran 1,500, sementara ONA dan Music memiliki jumlah jauh lebih rendah (di bawah 1,000), mengindikasikan bahwa konten anime utama masih berfokus pada TV, OVA, dan Movie, dengan konten khusus seperti ONA dan Music kurang diminati atau diproduksi.
+
+4. Rata-rata rating tertinggi per genre
+
+![download](https://github.com/user-attachments/assets/71e04ed4-c2b1-4831-8152-aba6cb3537d5)
+
+
+   genre Josei dan Thriller memimpin dengan rata-rata rating mendekati 7, diikuti oleh Mystery, Police, Shounen, Supernatural, Shounen Ai, Military, School, dan Romance dengan nilai serupa di kisaran 6-7. Ini menunjukkan bahwa genre yang lebih spesifik seperti Josei dan Thriller cenderung mendapatkan apresiasi lebih tinggi, sementara genre populer seperti Romance juga tetap kompetitif, mengindikasikan preferensi pengguna terhadap cerita mendalam atau tematik yang kuat.
 
 ## Data Preparation
 
 Data preparation adalah proses penting dalam pengembangan model AI. Proses ini memastikan data yang digunakan berkualitas tinggi, relevan, dan siap untuk melatih model machine learning. Tanpa data preparation yang baik, model dapat menghasilkan performa buruk, bias, atau bahkan gagal mengenali pola yang diinginkan.
 
 ### Langkah-langkah:
-1. **Encoding**: One-hot encoding pada fitur lain.
-2. **Pemisahan Fitur dan Target:**   
-   - Target: HeartDisease
-   - Fitur: Seluruh kolom selain target
-3. **Train-test split**: 80% data latih, 20% data uji.
-4. **Scaling**: StandardScaler untuk `RestingBP`, `Cholesterol`, `MaxHR`, `Oldpeak`.
+1. Merge Dataset
+  - Gabung dataset rating.csv dengan animes.csv berdasarkan animeId.
+2. Data Cleaning
+  - Hapus baris dengan nilai kosong.
+  - Hilangkan duplikasi.
+  - Hapus kolom rating_x, ganti nama rating_y menjadi rating.
+3. Mapping ID ke Index Numerik
+    
+   1   user_ids = cleaned_data['userId'].unique().tolist()
+   2   user_to_user_encoded = {x: i for i, x in enumerate(user_ids)}
+
+4. Normalisasi Rating
+   - Rating dinormalisasi ke rentang 0–1 agar cocok dengan aktivasi sigmoid.
+5. Buat Kolom combined_features
+   - Gabungan titulo, genero, dan tipo untuk content-based filtering.
+6. Pembagian Data Training dan Validasi
+   - 80% untuk training, 20% untuk validasi.
 
 ### Alasan:
-1. Algoritma Random Forest tidak sensitif terhadap skala, tapi scaling membantu stabilitas.
-2. Encoding diperlukan agar fitur kategorikal dapat diproses oleh model.
-3. Pemisahan Fitur dan target ini sangat penting agar model dapat mempelajari hubungan antara fitur dan target dengan jelas.
-4. Train-test split sebelum scaling untuk mencegah data leakage.
+1. Memastikan kompatibilitas model machine learning.
+2. Membersihkan noise dan data tidak relevan.
+3. Mempersiapkan data untuk representasi embedding dan prediksi probabilitas.
 
 ## Modeling
-### Random Forest Classifier
-Random Forest membentuk beberapa pohon keputusan menggunakan teknik bootstrapping, lalu melakukan majority voting untuk menentukan prediksi akhir.
+### Content-Based Filtering
 ### Mekanisme:
-1. Membangun banyak pohon keputusan secara acak (bootstrap samples)
-2. Setiap pohon memilih fitur secara acak untuk split
-3. Prediksi akhir ditentukan oleh voting majority (untuk klasifikasi)
-
-### Parameter:
-- class_weight='balanced': Menyeimbangkan kelas target jika terjadi ketidakseimbangan (imbalanced class).
-- random_state=42: Agar eksperimen dapat direproduksi dengan hasil yang konsisten.
-- Parameter lainnya seperti n_estimators, max_dep, criterion menggunakan nilai default:
-  - n_estimators=100: Jumlah pohon default.
-  - max_depth=None: Setiap pohon dibiarkan tumbuh hingga sempurna.
-  - criterion='gini': Pengukuran kualitas split default.
+1. Gunakan TF-IDF Vectorizer untuk ekstraksi fitur teks.
+2. Hitung cosine similarity antar anime.
 
 ### Kelebihan:
-1. Menangani non-linearitas dan interaksi fitur
-2. Robust terhadap overfitting
-3. Menyediakan feature importance
+1. Tidak memerlukan riwayat pengguna.
+2. Cepat dan mudah diimplementasikan.
 
 ### Kekurangan:
-1. Membutuhkan lebih banyak resource komputasi
-2. Kurang interpretable dibanding Logistic Regression
+1. Tidak personal; rekomendasi sama untuk semua orang.
+2. Bergantung pada deskripsi dan genre yang tersedia.
 
 ## Evaluation
 
-### Metrik yang digunakan:
-1. **Accuracy:** `(TP+TN) / total`
-2. **Precision:** `TP / (TP + FP)`
-3. **Recall:** `TP / (TP + FN)`
-4. **F1-score:** `2 * (Precision * Recall) / (Precision + Recall)`
+### Metrik Evaluasi:
+1. Binary Crossentropy : Untuk loss function.
+2. RMSE (Root Mean Squared Error) : Untuk mengukur akurasi prediksi.
 
 ### Hasil Evaluasi Model:
-Random Forest Performance:
-Accuracy: 0.8696
-F1-Score: 0.8698
+Berikut adalah ringkasan performa model berdasarkan metrik Root Mean Square Error (RMSE) untuk data pelatihan (TRAIN RMSE) dan validasi (VAL RMSE) pada dua epoch yang berbeda:
 
-#### Classification Report
+| EPOCH | TRAIN RMSE | VAL RMSE |
+|-------|------------|----------|
+| 1     | 0.0055     | 0.0769   |
+| 100   | 0.0026     | 0.0473   |
 
-| Class | Precision | Recall | F1-Score | Support |
-|-------|-----------|--------|----------|---------|
-| 0     | 0.84      | 0.86   | 0.85     | 77      |
-| 1     | 0.90      | 0.88   | 0.89     | 107     |
+## Catatan
+- EPOCH 1: Model menunjukkan TRAIN RMSE 0.0055 dan VAL RMSE 0.0769, menandakan performa awal yang cukup baik pada data pelatihan namun ada kesenjangan dengan data validasi.
+- EPOCH 100: Setelah 100 epoch, TRAIN RMSE menurun menjadi 0.0026 dan VAL RMSE menjadi 0.0473, menunjukkan peningkatan akurasi dan generalisasi model seiring waktu.
+- Penurunan RMSE pada kedua set data menunjukkan bahwa model terus belajar dan mengurangi error selama pelatihan.
 
-**Accuracy**: 0.87 (184 samples)  
-**Macro Avg**: Precision = 0.87, Recall = 0.87, F1-Score = 0.87  
-**Weighted Avg**: Precision = 0.87, Recall = 0.87, F1-Score = 0.87
-
-
-## Analisis Dampak terhadap Business Understanding:
-Model memberikan prediksi yang seimbang antara mengenali pasien yang benar-benar berisiko dan meminimalisasi false positives, yang sangat penting dalam konteks klinis. Ini menjawab Problem Statement #1 dan #3, yaitu:
-
-- Membangun model prediktif akurat
-- Memastikan generalisasi model yang baik
-
-Dengan akurasi 86.9%, model ini melampaui target goal ≥85%.
-Selain itu, feature importance dari model menunjukkan bahwa Oldpeak, MaxHR, dan Age adalah faktor risiko dominan, menjawab Problem Statement #2.
 
 ### Kesimpulan
-Model Random Forest yang dibangun berhasil mencapai performa yang baik dengan akurasi >86%, memberikan insight terhadap fitur yang berkontribusi besar, dan layak diimplementasikan dalam sistem prediksi risiko penyakit jantung sebagai bagian dari sistem pendukung keputusan medis.
-
+Proyek ini berhasil membangun sistem rekomendasi anime menggunakan pendekatan Content-Based Filtering, dengan hasil yang akurat, logis, dan stabil. Hasil evaluasi dan rekomendasi menunjukkan bahwa model siap digunakan dalam sistem rekomendasi nyata, seperti pada platform streaming anime atau aplikasi berbasis pengguna lainnya.
 
