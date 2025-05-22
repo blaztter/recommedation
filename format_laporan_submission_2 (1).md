@@ -1,8 +1,14 @@
-# Laporan Proyek Machine Learning - Nama Anda
+# Laporan Proyek Machine Learning - Muhamad Azis
 
 ## Project Overview
 
-Pada bagian ini, Kamu perlu menuliskan latar belakang yang relevan dengan proyek yang diangkat.
+Dengan meningkatnya jumlah konten anime di platform digital seperti MyAnimeList, Netflix, dan Crunchyroll, pengguna seringkali kesulitan dalam memilih anime yang sesuai dengan minat mereka. Hal ini diperparah dengan semakin banyaknya judul baru setiap musim.
+
+Sistem rekomendasi menjadi solusi penting untuk membantu pengguna menjelajahi koleksi anime secara lebih efisien dan personal. Dalam proyek ini, saya mengembangkan sistem rekomendasi anime menggunakan dua pendekatan utama:
+
+Content-Based Filtering
+Collaborative Filtering (Neural Network)
+Kedua pendekatan ini saling melengkapi dan bisa dikembangkan menjadi sistem rekomendasi hibrida di masa depan.
 
 **Rubrik/Kriteria Tambahan (Opsional)**:
 - Jelaskan mengapa dan bagaimana masalah tersebut harus diselesaikan
