@@ -33,10 +33,20 @@ terdapat 3 folder yaitu
 2. rating berisi 1504 baris 3 kolom
 3. anime berisi 12294 baris 
 
-## Kondisi Data
-1. Missing Values: Tidak ditemukan 
-2. Duplikasi: Tidak ada data duplikat (`df.duplicated().sum() = 0`)
-3. nilai kosong: Tidak ada
+### Kondisi Dataset usurios
+1. Missing Values: Tidak ditemukan nilai kosong
+2. Duplikasi: Tidak ada data duplikat 
+3. Outlier: Tidak ada Outlier
+
+### Kondisi Dataset rating
+1. Missing Values: Tidak ditemukan nilai kosong
+2. Duplikasi: terdapat duplikasi sebanyak 18 
+3. Outlier: Tidak ada Outlier
+
+### Kondisi Dataset anime
+1. Missing Values: Tidak ditemukan nilai kosong
+2. Duplikasi: Tidak ada data duplikat 
+3. Outlier: Tidak ada Outlier
 
 ### Fitur-fitur dalam dataset:
 
@@ -94,29 +104,40 @@ Data preparation adalah proses penting dalam pengembangan model AI. Proses ini m
 2. Data Cleaning
   - Hapus baris dengan nilai kosong.
   - Hilangkan duplikasi.
-  - Hapus kolom rating_x, ganti nama rating_y menjadi rating.
-3. Mapping ID ke Index Numerik
-    
+3. Hapus kolom rating_x
+  - menghapus kolom rating_x 
+4. ganti nama rating_y menjadi rating.
+  - untuk memudahkan, ubah nama rating_y menjadi rating
+5. Mapping ID ke Index Numerik
    1   user_ids = cleaned_data['userId'].unique().tolist()
    2   user_to_user_encoded = {x: i for i, x in enumerate(user_ids)}
-
-4. Normalisasi Rating
+6. Feature Selection
+  - pilih kolom-kolom yang relevan untuk analisis lebih lanjut (seperti userId, animeId, titulo, dll.) dan membuat dataset baru cleaned_data
+7. Normalisasi Rating
    - Rating dinormalisasi ke rentang 0–1 agar cocok dengan aktivasi sigmoid.
-5. Buat Kolom combined_features
+8. Buat Kolom combined_features
    - Gabungan titulo, genero, dan tipo untuk content-based filtering.
-6. Pembagian Data Training dan Validasi
+9. Pembagian Data Training dan Validasi
    - 80% untuk training, 20% untuk validasi.
+ 
 
 ### Alasan:
 1. Memastikan kompatibilitas model machine learning.
 2. Membersihkan noise dan data tidak relevan.
 3. Mempersiapkan data untuk representasi embedding dan prediksi probabilitas.
+4. Menggabungkan informasi pengguna dengan data anime memungkinkan kita memiliki data lengkap yang mencakup rating pengguna serta fitur konten anime. Ini penting untuk sistem rekomendasi yang menggabungkan pendekatan collaborative dan content-based.
+5. Data yang hilang atau duplikat dapat menyebabkan kebingungan model saat belajar, menghasilkan prediksi yang tidak akurat atau bias. Membersihkannya membantu menjaga integritas dan kualitas data.
+6. Setelah penggabungan, kolom rating bisa muncul ganda (misalnya rating_x dan rating_y). Menghapus kolom yang tidak dibutuhkan mencegah kebingungan dan menyederhanakan struktur dataset.
+7. Penamaan kolom yang konsisten dan mudah dipahami memudahkan proses analisis dan pemrosesan data lanjutan.
+8. Memfokuskan analisis hanya pada fitur penting mengurangi kompleksitas data dan mempercepat proses pelatihan model tanpa kehilangan informasi yang bernilai.
+9. Aktivasi seperti sigmoid hanya bekerja baik dalam rentang [0,1].
+10. Memisahkan data validasi penting untuk mengukur kinerja model pada data yang belum pernah dilihat, mencegah overfitting dan memastikan generalisasi model.
 
 ## Modeling
 ### Content-Based Filtering
 ### Mekanisme:
-1. Gunakan TF-IDF Vectorizer untuk ekstraksi fitur teks.
-2. Hitung cosine similarity antar anime.
+1. Menggunakan TF-IDF untuk mengubah teks menjadi vektor numerik.
+2. Cosine Similarity digunakan untuk menghitung kemiripan antar anime.
 
 ### Kelebihan:
 1. Tidak memerlukan riwayat pengguna.
@@ -126,11 +147,17 @@ Data preparation adalah proses penting dalam pengembangan model AI. Proses ini m
 1. Tidak personal; rekomendasi sama untuk semua orang.
 2. Bergantung pada deskripsi dan genre yang tersedia.
 
+## hasil Top-N Recommendation
+
+![image](https://github.com/user-attachments/assets/6008383a-d452-4cad-b343-a9fb6e5d56bc)
+
+
 ## Evaluation
 
+
 ### Metrik Evaluasi:
-1. Binary Crossentropy : Untuk loss function.
-2. RMSE (Root Mean Squared Error) : Untuk mengukur akurasi prediksi.
+1. Binary Crossentropy sebagai loss function dalam pelatihan model (terutama jika digunakan dalam pembelajaran berbasis rating biner seperti suka/tidak suka).
+2. RMSE (Root Mean Squared Error) sebagai indikator akurasi prediksi numerik terhadap rating.
 
 ### Hasil Evaluasi Model:
 Berikut adalah ringkasan performa model berdasarkan metrik Root Mean Square Error (RMSE) untuk data pelatihan (TRAIN RMSE) dan validasi (VAL RMSE) pada dua epoch yang berbeda:
@@ -147,5 +174,8 @@ Berikut adalah ringkasan performa model berdasarkan metrik Root Mean Square Erro
 
 
 ### Kesimpulan
-Proyek ini berhasil membangun sistem rekomendasi anime menggunakan pendekatan Content-Based Filtering, dengan hasil yang akurat, logis, dan stabil. Hasil evaluasi dan rekomendasi menunjukkan bahwa model siap digunakan dalam sistem rekomendasi nyata, seperti pada platform streaming anime atau aplikasi berbasis pengguna lainnya.
+Model telah berhasil memenuhi goal bisnis yang ditentukan pada tahap Business Understanding. Dengan performa RMSE yang baik, model mampu:
+1. Memberikan rekomendasi yang akurat dan personal bagi pengguna yang tidak memiliki riwayat rating.
+2. Menyajikan sistem rekomendasi yang scalable dan mudah diintegrasikan pada platform digital seperti aplikasi pencarian atau katalog anime.
+Sebagai pengembangan lanjutan, model ini bisa dikombinasikan dengan pendekatan Collaborative Filtering untuk meningkatkan personalisasi berdasarkan perilaku pengguna secara lebih mendalam.
 
