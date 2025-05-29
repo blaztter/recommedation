@@ -115,8 +115,11 @@ Data preparation adalah proses penting dalam pengembangan model AI. Proses ini m
   - pilih kolom-kolom yang relevan untuk analisis lebih lanjut (seperti userId, animeId, titulo, dll.) dan membuat dataset baru cleaned_data
 7. Normalisasi Rating
    - Rating dinormalisasi ke rentang 0–1 agar cocok dengan aktivasi sigmoid.
-8. Buat Kolom combined_features
-   - Gabungan titulo, genero, dan tipo untuk content-based filtering.
+8. Ekstraksi Fitur dengan TF-IDF
+   - Untuk Content-Based Filtering, fitur teks seperti titulo, genero, dan tipo digabungkan menjadi satu kolom bernama combined_features.
+   - Dilakukan vektorisasi menggunakan TF-IDF (Term Frequency-Inverse Document Frequency) untuk mengubah teks menjadi representasi numerik.
+   - TF-IDF digunakan karena mampu menilai pentingnya sebuah kata dalam dokumen relatif terhadap seluruh dokumen lain dalam korpus.
+   - Hasil vektorisasi ini digunakan sebagai input untuk menghitung kemiripan antar anime menggunakan cosine similarity.
 9. Pembagian Data Training dan Validasi
    - 80% untuk training, 20% untuk validasi.
  
@@ -132,12 +135,13 @@ Data preparation adalah proses penting dalam pengembangan model AI. Proses ini m
 8. Memfokuskan analisis hanya pada fitur penting mengurangi kompleksitas data dan mempercepat proses pelatihan model tanpa kehilangan informasi yang bernilai.
 9. Aktivasi seperti sigmoid hanya bekerja baik dalam rentang [0,1].
 10. Memisahkan data validasi penting untuk mengukur kinerja model pada data yang belum pernah dilihat, mencegah overfitting dan memastikan generalisasi model.
+11. Ekstraksi fitur TF-IDF sangat penting untuk Content-Based Filtering karena mengubah informasi teks menjadi format numerik yang dapat diproses oleh model.
 
 ## Modeling
 ### Content-Based Filtering
 ### Mekanisme:
-1. Menggunakan TF-IDF untuk mengubah teks menjadi vektor numerik.
-2. Cosine Similarity digunakan untuk menghitung kemiripan antar anime.
+1. Setiap anime direpresentasikan sebagai vektor berdasarkan fitur seperti judul, genre, dan tipe.
+2. Rekomendasi diberikan berdasarkan anime-anime yang memiliki skor kemiripan tinggi dengan anime yang disukai pengguna.
 
 ### Kelebihan:
 1. Tidak memerlukan riwayat pengguna.
@@ -146,6 +150,22 @@ Data preparation adalah proses penting dalam pengembangan model AI. Proses ini m
 ### Kekurangan:
 1. Tidak personal; rekomendasi sama untuk semua orang.
 2. Bergantung pada deskripsi dan genre yang tersedia.
+
+### Collaborative Filtering
+### Mekanisme:
+1. Matriks pengguna-anime dibangun berdasarkan pasangan (userId, animeId) dan nilai rating.
+2. Pengguna dan anime dipetakan ke indeks numerik untuk digunakan dalam embedding layer.
+3. Model NCF menggunakan beberapa dense layer untuk mempelajari interaksi non-linear antara pengguna dan anime.
+
+### Kelebihan:
+1. Rekomendasi sangat personal berdasarkan pola perilaku pengguna.
+2. Mampu menangkap pola kompleks dari interaksi pengguna-anime.
+3. Hasil lebih akurat dibanding pendekatan matriks faktorisasi tradisional.
+
+### Kekurangan:
+1. Mengalami masalah cold start untuk pengguna baru tanpa riwayat interaksi.
+2. Butuh waktu dan sumber daya komputasi lebih besar untuk pelatihan.
+
 
 ## hasil Top-N Recommendation
 
